@@ -32,7 +32,7 @@ export function simulateMatches(
   });
 
   const allMatches = [...existingMatches, ...simulated];
-  return evaluateDiscipline(player, allMatches, discipline, referenceDate);
+  return evaluateDiscipline(player, allMatches, discipline, referenceDate, { skipInactivityCheck: true });
 }
 
 export function winsNeededToPromote(

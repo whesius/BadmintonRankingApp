@@ -14,19 +14,20 @@ export function evaluateDiscipline(
   player: PlayerProfile,
   matches: MatchRecord[],
   discipline: Discipline,
-  referenceDate: Date = new Date()
+  referenceDate: Date = new Date(),
+  options: { skipInactivityCheck?: boolean } = {}
 ): ClassificationResult {
   const level = player.classifications[discipline];
   const totalInWindow = countMatchesInWindow(matches, discipline, referenceDate);
   const isInactive = totalInWindow < CONFIG.INACTIVITY_MATCH_THRESHOLD;
 
-  // Rising average
+  // Rising average (round to 1 decimal to ensure display matches logic)
   const risingMatches = filterValidMatches(matches, level, discipline, "rising", referenceDate);
-  const risingAverage = calculateOptimizedAverage(risingMatches, "rising");
+  const risingAverage = Math.round(calculateOptimizedAverage(risingMatches, "rising") * 10) / 10;
 
-  // Falling average
+  // Falling average (round to 1 decimal to ensure display matches logic)
   const fallingMatches = filterValidMatches(matches, level, discipline, "falling", referenceDate);
-  const fallingAverage = calculateOptimizedAverage(fallingMatches, "falling");
+  const fallingAverage = Math.round(calculateOptimizedAverage(fallingMatches, "falling") * 10) / 10;
 
   // Thresholds
   const nextHigher = level - 1;
@@ -52,7 +53,7 @@ export function evaluateDiscipline(
   // Determine action
   let action: "promote" | "demote" | "stay" = "stay";
 
-  if (isInactive) {
+  if (isInactive && !options.skipInactivityCheck) {
     action = "stay";
   } else if (riseThreshold !== null && risingAverage >= riseThreshold) {
     action = "promote";
@@ -71,8 +72,8 @@ export function evaluateDiscipline(
 
   return {
     discipline,
-    risingAverage: Math.round(risingAverage * 10) / 10,
-    fallingAverage: Math.round(fallingAverage * 10) / 10,
+    risingAverage,
+    fallingAverage,
     riseThreshold,
     fallThreshold,
     action,
