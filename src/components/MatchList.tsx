@@ -6,8 +6,8 @@ interface Props {
 }
 
 function opponentLabel(m: MatchRecord): string {
-  if (m.discipline === "singles") return `Lvl ${m.opponentLevel}`;
-  return `Lvl ${m.opponent1Level} + ${m.opponent2Level}`;
+  if (m.discipline === "singles") return `Lvl ${m.opponentLevel ?? "?"}`;
+  return `Lvl ${m.opponent1Level ?? "?"} + ${m.opponent2Level ?? "?"}`;
 }
 
 export function MatchList({ matches, onDelete }: Props) {

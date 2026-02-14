@@ -48,7 +48,13 @@ export function ImportMatches({ player, onImport }: Props) {
   }
 
   function processHtml(html: string) {
-    const all = parseBVHtml(html, player.name);
+    let all: ImportedMatch[];
+    try {
+      all = parseBVHtml(html, player.name);
+    } catch {
+      setError("Could not parse the HTML. Make sure you copied the full page source.");
+      return;
+    }
     const recent = filterLast52Weeks(all);
     if (recent.length === 0) {
       setError(

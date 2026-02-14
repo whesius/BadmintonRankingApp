@@ -44,7 +44,7 @@ export function StatusCard({ result }: { result: ClassificationResult }) {
                 />
               </div>
               <div className="mt-1 flex justify-between text-xs text-gray-500">
-                <span>{result.progressToPromotion.toFixed(0)}% to promotion</span>
+                <span>{Math.min(100, result.progressToPromotion).toFixed(0)}% to promotion</span>
                 <span>Need: {result.riseThreshold}</span>
               </div>
             </>

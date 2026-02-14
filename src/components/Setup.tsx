@@ -31,8 +31,12 @@ export function Setup({ player, onUpdate, onReload }: Props) {
     if (!file) return;
     const reader = new FileReader();
     reader.onload = () => {
-      importAllData(reader.result as string);
-      onReload();
+      try {
+        importAllData(reader.result as string);
+        onReload();
+      } catch {
+        alert("Invalid file. Please select a valid JSON export.");
+      }
     };
     reader.readAsText(file);
   }
