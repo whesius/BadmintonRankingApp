@@ -14,8 +14,11 @@ export function Simulator({ player, matches }: Props) {
   const [discipline, setDiscipline] = useState<Discipline>("singles");
   const [hypothetical, setHypothetical] = useState<SimulationMatch[]>([]);
   const [addResult, setAddResult] = useState<"win" | "loss">("win");
-  const [addOpponent, setAddOpponent] = useState(8);
+  const [addOpponent1, setAddOpponent1] = useState(8);
+  const [addOpponent2, setAddOpponent2] = useState(8);
+  const [addPartner, setAddPartner] = useState(player.classifications[discipline]);
 
+  const isDoubles = discipline === "doubles" || discipline === "mixed";
   const levels = Array.from({ length: 12 }, (_, i) => i + 1);
 
   // Current state (no hypothetical)
@@ -33,7 +36,10 @@ export function Simulator({ player, matches }: Props) {
   })).filter((q) => q.needed > 0 && q.needed <= 20);
 
   function addSimMatch() {
-    setHypothetical((prev) => [...prev, { discipline, result: addResult, opponentLevel: addOpponent }]);
+    const match: SimulationMatch = isDoubles
+      ? { discipline, result: addResult, opponentLevel: addOpponent1, opponent1Level: addOpponent1, opponent2Level: addOpponent2, partnerLevel: addPartner }
+      : { discipline, result: addResult, opponentLevel: addOpponent1 };
+    setHypothetical((prev) => [...prev, match]);
   }
 
   function clearSim() {
@@ -45,7 +51,7 @@ export function Simulator({ player, matches }: Props) {
       {/* Discipline selector */}
       <div className="flex gap-2">
         {DISCIPLINES.map((d) => (
-          <button key={d} onClick={() => { setDiscipline(d); setHypothetical([]); }}
+          <button key={d} onClick={() => { setDiscipline(d); setHypothetical([]); setAddPartner(player.classifications[d]); }}
             className={`rounded px-4 py-2 text-sm font-medium ${
               discipline === d ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}>
@@ -81,7 +87,7 @@ export function Simulator({ player, matches }: Props) {
         {/* Add hypothetical matches */}
         <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
           <h3 className="mb-3 text-lg font-semibold text-gray-900">What If...</h3>
-          <div className="mb-3 flex items-end gap-2">
+          <div className="mb-3 flex flex-wrap items-end gap-2">
             <div>
               <label className="mb-1 block text-xs text-gray-600">Result</label>
               <select value={addResult} onChange={(e) => setAddResult(e.target.value as "win" | "loss")}
@@ -90,13 +96,39 @@ export function Simulator({ player, matches }: Props) {
                 <option value="loss">Loss</option>
               </select>
             </div>
-            <div>
-              <label className="mb-1 block text-xs text-gray-600">vs Level</label>
-              <select value={addOpponent} onChange={(e) => setAddOpponent(Number(e.target.value))}
-                className="rounded border border-gray-300 px-2 py-1.5 text-sm">
-                {levels.map((l) => <option key={l} value={l}>{l}</option>)}
-              </select>
-            </div>
+            {isDoubles ? (
+              <>
+                <div>
+                  <label className="mb-1 block text-xs text-gray-600">Opp 1</label>
+                  <select value={addOpponent1} onChange={(e) => setAddOpponent1(Number(e.target.value))}
+                    className="rounded border border-gray-300 px-2 py-1.5 text-sm">
+                    {levels.map((l) => <option key={l} value={l}>{l}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-gray-600">Opp 2</label>
+                  <select value={addOpponent2} onChange={(e) => setAddOpponent2(Number(e.target.value))}
+                    className="rounded border border-gray-300 px-2 py-1.5 text-sm">
+                    {levels.map((l) => <option key={l} value={l}>{l}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-gray-600">Partner</label>
+                  <select value={addPartner} onChange={(e) => setAddPartner(Number(e.target.value))}
+                    className="rounded border border-gray-300 px-2 py-1.5 text-sm">
+                    {levels.map((l) => <option key={l} value={l}>{l}</option>)}
+                  </select>
+                </div>
+              </>
+            ) : (
+              <div>
+                <label className="mb-1 block text-xs text-gray-600">vs Level</label>
+                <select value={addOpponent1} onChange={(e) => setAddOpponent1(Number(e.target.value))}
+                  className="rounded border border-gray-300 px-2 py-1.5 text-sm">
+                  {levels.map((l) => <option key={l} value={l}>{l}</option>)}
+                </select>
+              </div>
+            )}
             <button onClick={addSimMatch}
               className="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
               + Add
@@ -116,7 +148,11 @@ export function Simulator({ player, matches }: Props) {
                   <span className={h.result === "win" ? "text-green-600" : "text-red-600"}>
                     {h.result === "win" ? "W" : "L"}
                   </span>
-                  <span>vs level {h.opponentLevel}</span>
+                  <span>
+                    {h.opponent1Level && h.opponent2Level
+                      ? `vs ${h.opponent1Level}+${h.opponent2Level} w/ partner ${h.partnerLevel}`
+                      : `vs level ${h.opponentLevel}`}
+                  </span>
                   <button onClick={() => setHypothetical((prev) => prev.filter((_, j) => j !== i))}
                     className="text-xs text-gray-400 hover:text-red-500">x</button>
                 </div>
