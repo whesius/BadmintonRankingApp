@@ -13,6 +13,7 @@ export function simulateMatches(
   const today = referenceDate.toISOString().split("T")[0];
 
   const simulated: MatchRecord[] = hypotheticalMatches.map((m) => {
+    const isDoubles = m.discipline === "doubles" || m.discipline === "mixed";
     const record: MatchRecord = {
       id: uuidv4(),
       date: today,
@@ -21,9 +22,9 @@ export function simulateMatches(
       walkover: false,
       competition: "tournament",
       opponentLevel: m.opponentLevel,
-      partnerLevel: m.partnerLevel,
-      opponent1Level: m.opponent1Level,
-      opponent2Level: m.opponent2Level,
+      partnerLevel: m.partnerLevel ?? (isDoubles ? player.classifications[m.discipline] : undefined),
+      opponent1Level: m.opponent1Level ?? (isDoubles ? m.opponentLevel : undefined),
+      opponent2Level: m.opponent2Level ?? (isDoubles ? m.opponentLevel : undefined),
       points: 0,
       playerLevelAtTime: player.classifications[m.discipline],
     };

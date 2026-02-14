@@ -114,6 +114,121 @@ describe("Classification — inactivity in simulator", () => {
     expect(needed).toBe(1);
   });
 
+  it("simulator doubles: wins earn points using opponentLevel as both opponents", () => {
+    // Player at level 8 doubles, 0 real matches, simulates 1 win vs level 5
+    // For doubles, opponent1Level and opponent2Level should default to opponentLevel (5)
+    // Points = (POINTS_TABLE[5] + POINTS_TABLE[5]) / 2 = 652
+    // avg = 652/7 = 93.1 >= 105 (level 8 rise threshold)? No, 93.1 < 105
+    // But with enough wins it should work. Let's try 7 wins:
+    // avg = 652, threshold = 105 → 652 >= 105 → promote
+    const player = makePlayer(8);
+    const noMatches: MatchRecord[] = [];
+
+    const result = simulateMatches(
+      player, noMatches,
+      Array.from({ length: 7 }, () => ({
+        discipline: "doubles" as const, result: "win" as const, opponentLevel: 5,
+      })),
+      "doubles", refDate
+    );
+
+    // With 7 wins at 652 pts each, avg = 652. Must promote (threshold 105).
+    expect(result.risingAverage).toBe(652);
+    expect(result.action).toBe("promote");
+  });
+
+  it("simulator mixed: wins earn points using opponentLevel as both opponents", () => {
+    const player = makePlayer(8);
+    const noMatches: MatchRecord[] = [];
+
+    const result = simulateMatches(
+      player, noMatches,
+      Array.from({ length: 7 }, () => ({
+        discipline: "mixed" as const, result: "win" as const, opponentLevel: 5,
+      })),
+      "mixed", refDate
+    );
+
+    expect(result.risingAverage).toBe(652);
+    expect(result.action).toBe("promote");
+  });
+
+  it("winsNeededToPromote works for doubles", () => {
+    // Player level 8 doubles, threshold to promote = level 7 rise = 152
+    // Win vs level 8 opponents: points = (217+217)/2 = 217
+    // n=4: 868/7 = 124.0 < 152 → no
+    // n=5: 1085/7 = 155.0 >= 152 → yes
+    const player = makePlayer(8);
+    const noMatches: MatchRecord[] = [];
+
+    const needed = winsNeededToPromote(player, noMatches, "doubles", 8, refDate);
+
+    expect(needed).toBe(5);
+  });
+
+  it("doubles simulated win earns non-zero points (0-points bug fix)", () => {
+    // BUG (before fix): simulator only set opponentLevel, but calculatePoints
+    // for doubles needs opponent1Level + opponent2Level → got 0 points for every win.
+    // Result: rising avg stuck at 0 no matter how many wins added.
+    const player = makePlayer(8);
+    const noMatches: MatchRecord[] = [];
+
+    const result = simulateMatches(
+      player, noMatches,
+      [{ discipline: "doubles", result: "win", opponentLevel: 8 }],
+      "doubles", refDate
+    );
+
+    // 1 win at (217+217)/2 = 217 pts, count=1 < 7 → avg = 217/7 = 31.0
+    // BUG: avg was 0 because points were 0
+    expect(result.risingAverage).toBe(31.0);
+  });
+
+  it("mixed simulated win earns non-zero points (0-points bug fix)", () => {
+    const player = makePlayer(8);
+    const noMatches: MatchRecord[] = [];
+
+    const result = simulateMatches(
+      player, noMatches,
+      [{ discipline: "mixed", result: "win", opponentLevel: 8 }],
+      "mixed", refDate
+    );
+
+    expect(result.risingAverage).toBe(31.0);
+  });
+
+  it("doubles gap decreases as simulated wins are added", () => {
+    // Verifies the gap actually shrinks — before fix it stayed constant
+    const player = makePlayer(8);
+    const noMatches: MatchRecord[] = [];
+
+    const result1 = simulateMatches(
+      player, noMatches,
+      [{ discipline: "doubles", result: "win", opponentLevel: 8 }],
+      "doubles", refDate
+    );
+    const result3 = simulateMatches(
+      player, noMatches,
+      Array.from({ length: 3 }, () => ({
+        discipline: "doubles" as const, result: "win" as const, opponentLevel: 8,
+      })),
+      "doubles", refDate
+    );
+
+    expect(result3.gapToPromotion).toBeLessThan(result1.gapToPromotion);
+  });
+
+  it("winsNeededToPromote works for mixed", () => {
+    // Same as doubles — mixed should also default opponent1/2 from opponentLevel
+    const player = makePlayer(8);
+    const noMatches: MatchRecord[] = [];
+
+    const needed = winsNeededToPromote(player, noMatches, "mixed", 8, refDate);
+
+    // Same calc as doubles: 5 wins at 217 → 1085/7 = 155.0 >= 152
+    expect(needed).toBe(5);
+  });
+
   it("dashboard still respects inactivity check", () => {
     // Same scenario but via evaluateDiscipline (dashboard context)
     // Should stay inactive — action = "stay"
