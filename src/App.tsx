@@ -22,8 +22,20 @@ const TABS: { id: Tab; label: string }[] = [
   { id: "contact", label: "Contact" },
 ];
 
+const TAB_IDS = new Set(TABS.map((t) => t.id));
+
+function getTabFromHash(): Tab {
+  const hash = window.location.hash.slice(1);
+  return TAB_IDS.has(hash as Tab) ? (hash as Tab) : "dashboard";
+}
+
 export default function App() {
-  const [tab, setTab] = useState<Tab>("dashboard");
+  const [tab, setTabState] = useState<Tab>(getTabFromHash);
+
+  const setTab = useCallback((t: Tab) => {
+    setTabState(t);
+    window.location.hash = t;
+  }, []);
   const { player, setPlayer, updatePlayer } = usePlayer();
   const { matches, addMatch, addMatches, deleteMatch } = useMatches();
 
