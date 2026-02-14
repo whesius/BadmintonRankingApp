@@ -6,15 +6,17 @@ import { MatchForm } from "./components/MatchForm.tsx";
 import { MatchList } from "./components/MatchList.tsx";
 import { Simulator } from "./components/Simulator.tsx";
 import { Setup } from "./components/Setup.tsx";
+import { Help } from "./components/Help.tsx";
 import { loadPlayer } from "./storage/localStorage.ts";
 
-type Tab = "dashboard" | "matches" | "simulator" | "setup";
+type Tab = "dashboard" | "matches" | "simulator" | "setup" | "help";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "dashboard", label: "Dashboard" },
   { id: "matches", label: "Matches" },
   { id: "simulator", label: "Simulator" },
   { id: "setup", label: "Setup" },
+  { id: "help", label: "Help" },
 ];
 
 export default function App() {
@@ -65,6 +67,7 @@ export default function App() {
         )}
         {tab === "simulator" && <Simulator player={player} matches={matches} />}
         {tab === "setup" && <Setup player={player} onUpdate={updatePlayer} onReload={handleReload} />}
+        {tab === "help" && <Help />}
       </main>
     </div>
   );
