@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { parseBVHtml, filterLast52Weeks, type ImportedMatch } from "../engine/importBV.ts";
 import { calculatePoints } from "../engine/points.ts";
@@ -190,6 +190,16 @@ export function ImportMatches({ player, onImport }: Props) {
       <h3 className="mb-3 text-lg font-semibold text-gray-900">
         Import from Badminton Vlaanderen
       </h3>
+      {player.name ? (
+        <p className="mb-3 text-xs text-gray-500">
+          Matching player: <span className="font-semibold">{player.name}</span> — must match your name on the BV page exactly.
+          Change it in <span className="font-semibold">Setup</span> if needed.
+        </p>
+      ) : (
+        <p className="mb-3 text-xs text-amber-600 font-medium">
+          No player name set. Go to <span className="font-semibold">Setup</span> first and enter your name exactly as it appears on the BV page.
+        </p>
+      )}
 
       {parsedMatches.length === 0 ? (
         <div className="space-y-4">
@@ -261,7 +271,7 @@ export function ImportMatches({ player, onImport }: Props) {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200 text-left text-xs text-gray-500">
-                  <th className="pb-2 pr-2">
+                  <th className="pb-2 pr-2 w-8">
                     <input
                       type="checkbox"
                       checked={selected.size === parsedMatches.length}
@@ -269,126 +279,128 @@ export function ImportMatches({ player, onImport }: Props) {
                     />
                   </th>
                   <th className="pb-2 pr-2">Date</th>
-                  <th className="pb-2 pr-2">Discipline</th>
-                  <th className="pb-2 pr-2">Result</th>
-                  <th className="pb-2 pr-2">Opponents</th>
-                  <th className="pb-2 pr-2">Score</th>
-                  <th className="pb-2 pr-2">Levels</th>
+                  <th className="pb-2 pr-2 text-right">Home</th>
+                  <th className="pb-2 px-2 text-center">Score</th>
+                  <th className="pb-2 pl-2">Away</th>
+                  <th className="pb-2 pl-2">Disc.</th>
                 </tr>
               </thead>
               <tbody>
-                {parsedMatches.map((m, i) => {
-                  const isDoubles = m.discipline !== "singles";
-                  return (
-                    <tr key={i} className="border-b border-gray-100">
-                      <td className="py-2 pr-2">
-                        <input
-                          type="checkbox"
-                          checked={selected.has(i)}
-                          onChange={() => toggleSelect(i)}
-                        />
-                      </td>
-                      <td className="py-2 pr-2 whitespace-nowrap">{m.date}</td>
-                      <td className="py-2 pr-2">
-                        <select
-                          value={m.discipline}
-                          onChange={(e) => changeDiscipline(i, e.target.value as Discipline)}
-                          className="rounded border border-gray-300 px-1 py-0.5 text-xs"
-                        >
-                          <option value="singles">Singles</option>
-                          <option value="doubles">Doubles</option>
-                          <option value="mixed">Mixed</option>
-                        </select>
-                      </td>
-                      <td
-                        className={`py-2 pr-2 font-medium ${
-                          m.result === "win" ? "text-green-600" : "text-red-600"
-                        }`}
+                {(() => {
+                  let lastTournament = "";
+                  return parsedMatches.map((m, i) => {
+                    const isDoubles = m.discipline !== "singles";
+                    const isWin = m.result === "win";
+                    const playerLevel = player.classifications[m.discipline];
+                    const leftBold = isWin ? "font-semibold" : "text-gray-500";
+                    const rightBold = isWin ? "text-gray-500" : "font-semibold";
+                    const showTournament = m.tournamentName !== lastTournament;
+                    lastTournament = m.tournamentName;
+
+                    const levelSelect = (
+                      value: number | undefined,
+                      onChange: (v: number) => void,
+                    ) => (
+                      <select
+                        value={value ?? 8}
+                        onChange={(e) => onChange(Number(e.target.value))}
+                        className="ml-1 w-12 rounded border border-gray-300 px-0.5 py-0 text-xs"
                       >
-                        {m.result}
-                        {m.walkover ? " (wo)" : ""}
-                      </td>
-                      <td className="py-2 pr-2">
-                        <div className="text-xs">{m.opponentNames.join(" / ")}</div>
-                        {m.partnerName && (
-                          <div className="text-xs text-gray-400">w/ {m.partnerName}</div>
+                        {LEVELS.map((l) => (
+                          <option key={l} value={l}>{l}</option>
+                        ))}
+                      </select>
+                    );
+
+                    return (
+                      <Fragment key={i}>
+                        {showTournament && (
+                          <tr>
+                            <td colSpan={6} className="pt-3 pb-1 text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                              {m.tournamentName}
+                            </td>
+                          </tr>
                         )}
-                      </td>
-                      <td className="py-2 pr-2 font-mono text-xs">{m.score}</td>
-                      <td className="py-2 pr-2">
-                        {!isDoubles ? (
-                          <div>
-                            <label className="text-xs text-gray-400">Opp</label>
+                        <tr className="border-b border-gray-100">
+                          <td className="py-2 pr-2 align-top">
+                            <input
+                              type="checkbox"
+                              checked={selected.has(i)}
+                              onChange={() => toggleSelect(i)}
+                            />
+                          </td>
+                          <td className="py-2 pr-2 whitespace-nowrap align-top">{m.date}</td>
+                          {/* Left side — our player (+ partner) */}
+                          <td className={`py-2 pr-2 text-right align-top ${leftBold}`}>
+                            <div className="flex flex-col items-end gap-0.5">
+                              <span>
+                                {player.name}
+                                <span className="ml-1 text-xs text-gray-400">[{playerLevel}]</span>
+                              </span>
+                              {isDoubles && m.partnerName && (
+                                <span>
+                                  {m.partnerName}
+                                  {levelSelect(m.partnerLevel, (v) =>
+                                    updateMatch(i, { partnerLevel: v })
+                                  )}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          {/* Score */}
+                          <td className="py-2 px-2 text-center align-top font-mono text-xs whitespace-nowrap">
+                            {m.score}
+                            {m.walkover && (
+                              <span className="ml-1 rounded bg-amber-100 px-1 py-0.5 text-[10px] font-medium text-amber-700">wo</span>
+                            )}
+                          </td>
+                          {/* Right side — opponents */}
+                          <td className={`py-2 pl-2 align-top ${rightBold}`}>
+                            <div className="flex flex-col gap-0.5">
+                              {!isDoubles ? (
+                                <span>
+                                  {m.opponentNames[0]}
+                                  {levelSelect(m.opponentLevel, (v) =>
+                                    updateMatch(i, { opponentLevel: v })
+                                  )}
+                                </span>
+                              ) : (
+                                <>
+                                  <span>
+                                    {m.opponentNames[0]}
+                                    {levelSelect(m.opponent1Level, (v) =>
+                                      updateMatch(i, { opponent1Level: v })
+                                    )}
+                                  </span>
+                                  {m.opponentNames[1] && (
+                                    <span>
+                                      {m.opponentNames[1]}
+                                      {levelSelect(m.opponent2Level, (v) =>
+                                        updateMatch(i, { opponent2Level: v })
+                                      )}
+                                    </span>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          </td>
+                          {/* Discipline */}
+                          <td className="py-2 pl-2 align-top">
                             <select
-                              value={m.opponentLevel ?? 8}
-                              onChange={(e) =>
-                                updateMatch(i, { opponentLevel: Number(e.target.value) })
-                              }
-                              className="ml-1 w-14 rounded border border-gray-300 px-1 py-0.5 text-xs"
+                              value={m.discipline}
+                              onChange={(e) => changeDiscipline(i, e.target.value as Discipline)}
+                              className="rounded border border-gray-300 px-1 py-0.5 text-xs"
                             >
-                              {LEVELS.map((l) => (
-                                <option key={l} value={l}>
-                                  {l}
-                                </option>
-                              ))}
+                              <option value="singles">Singles</option>
+                              <option value="doubles">Doubles</option>
+                              <option value="mixed">Mixed</option>
                             </select>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col gap-0.5">
-                            <div>
-                              <label className="text-xs text-gray-400">Opp 1</label>
-                              <select
-                                value={m.opponent1Level ?? 8}
-                                onChange={(e) =>
-                                  updateMatch(i, { opponent1Level: Number(e.target.value) })
-                                }
-                                className="ml-1 w-14 rounded border border-gray-300 px-1 py-0.5 text-xs"
-                              >
-                                {LEVELS.map((l) => (
-                                  <option key={l} value={l}>
-                                    {l}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                            <div>
-                              <label className="text-xs text-gray-400">Opp 2</label>
-                              <select
-                                value={m.opponent2Level ?? 8}
-                                onChange={(e) =>
-                                  updateMatch(i, { opponent2Level: Number(e.target.value) })
-                                }
-                                className="ml-1 w-14 rounded border border-gray-300 px-1 py-0.5 text-xs"
-                              >
-                                {LEVELS.map((l) => (
-                                  <option key={l} value={l}>
-                                    {l}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                            <div>
-                              <label className="text-xs text-gray-400">Partner</label>
-                              <select
-                                value={m.partnerLevel ?? 8}
-                                onChange={(e) =>
-                                  updateMatch(i, { partnerLevel: Number(e.target.value) })
-                                }
-                                className="ml-1 w-14 rounded border border-gray-300 px-1 py-0.5 text-xs"
-                              >
-                                {LEVELS.map((l) => (
-                                  <option key={l} value={l}>
-                                    {l}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
+                          </td>
+                        </tr>
+                      </Fragment>
+                    );
+                  });
+                })()}
               </tbody>
             </table>
           </div>

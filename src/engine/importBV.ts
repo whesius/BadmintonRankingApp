@@ -98,14 +98,14 @@ export function parseBVHtml(html: string, playerName: string): ImportedMatch[] {
 
     if (leftPlayers.length === 0 || rightPlayers.length === 0) continue;
 
-    // Determine which side Walter is on
-    const walterOnLeft = leftPlayers.some(isPlayer);
-    const walterOnRight = rightPlayers.some(isPlayer);
-    if (!walterOnLeft && !walterOnRight) continue;
+    // Determine which side the player is on
+    const playerOnLeft = leftPlayers.some(isPlayer);
+    const playerOnRight = rightPlayers.some(isPlayer);
+    if (!playerOnLeft && !playerOnRight) continue;
 
-    const myPlayers = walterOnLeft ? leftPlayers : rightPlayers;
-    const oppPlayers = walterOnLeft ? rightPlayers : leftPlayers;
-    const myTable = walterOnLeft ? leftTable : rightTable;
+    const myPlayers = playerOnLeft ? leftPlayers : rightPlayers;
+    const oppPlayers = playerOnLeft ? rightPlayers : leftPlayers;
+    const myTable = playerOnLeft ? leftTable : rightTable;
 
     // Determine win/loss from <strong> tags
     const iWon = isWinnerSide(myTable);
