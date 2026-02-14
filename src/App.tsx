@@ -8,6 +8,7 @@ import { Simulator } from "./components/Simulator.tsx";
 import { Setup } from "./components/Setup.tsx";
 import { Help } from "./components/Help.tsx";
 import { Contact } from "./components/Contact.tsx";
+import { ImportMatches } from "./components/ImportMatches.tsx";
 import { loadPlayer } from "./storage/localStorage.ts";
 
 type Tab = "dashboard" | "matches" | "simulator" | "setup" | "help" | "contact";
@@ -24,7 +25,7 @@ const TABS: { id: Tab; label: string }[] = [
 export default function App() {
   const [tab, setTab] = useState<Tab>("dashboard");
   const { player, setPlayer, updatePlayer } = usePlayer();
-  const { matches, addMatch, deleteMatch } = useMatches();
+  const { matches, addMatch, addMatches, deleteMatch } = useMatches();
 
   const handleReload = useCallback(() => {
     setPlayer(loadPlayer());
@@ -63,6 +64,7 @@ export default function App() {
         {tab === "dashboard" && <Dashboard player={player} matches={matches} />}
         {tab === "matches" && (
           <div className="space-y-6">
+            <ImportMatches player={player} onImport={addMatches} />
             <MatchForm player={player} onAdd={addMatch} />
             <MatchList matches={matches} onDelete={deleteMatch} />
           </div>

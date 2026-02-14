@@ -24,8 +24,11 @@ export function calculateOptimizedAverage(
     const newAvg = newTotal / newCount;
 
     if (newCount > 1 && newAvg < currentAvg) {
-      // Adding this win would lower the average — stop
-      break;
+      // For rising average with < 7 matches: the min-7 divisor means the
+      // effective average is total/7, so any added win increases it. Always include.
+      if (!(averageType === "rising" && newCount <= CONFIG.MIN_MATCHES_DIVISOR)) {
+        break;
+      }
     }
 
     totalPoints = newTotal;

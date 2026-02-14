@@ -18,6 +18,14 @@ export function useMatches() {
     });
   }, []);
 
+  const addMatches = useCallback((newMatches: MatchRecord[]) => {
+    setMatchesState((prev) => {
+      const next = [...prev, ...newMatches];
+      saveMatches(next);
+      return next;
+    });
+  }, []);
+
   const deleteMatch = useCallback((id: string) => {
     setMatchesState((prev) => {
       const next = prev.filter((m) => m.id !== id);
@@ -34,5 +42,5 @@ export function useMatches() {
     });
   }, []);
 
-  return { matches, setMatches, addMatch, deleteMatch, updateMatch };
+  return { matches, setMatches, addMatch, addMatches, deleteMatch, updateMatch };
 }

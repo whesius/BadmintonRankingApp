@@ -21,14 +21,15 @@ describe("calculateOptimizedAverage", () => {
     expect(calculateOptimizedAverage([], "rising")).toBe(0);
   });
 
-  it("calculates optimized average — drops low wins that lower avg", () => {
+  it("includes low wins when count < 7 for rising (min-7 divisor fix)", () => {
     // 2 losses (0 pts) + wins: 313, 217, 217, 50
     // Start with 2 losses: count=2, total=0, avg=0
-    // +313: count=3, total=313, avg=104.3 → keeps improving
-    // +217: count=4, total=530, avg=132.5 → improving
-    // +217: count=5, total=747, avg=149.4 → improving
-    // +50:  count=6, total=797, avg=132.8 → LOWER, stop
-    // Optimized: 5 matches, total=747. Since 5 < 7 (rising), divide by 7
+    // +313: count=3, avg=104.3 → improving
+    // +217: count=4, avg=132.5 → improving
+    // +217: count=5, avg=149.4 → improving
+    // +50:  count=6, avg=132.8 → per-match avg drops, BUT count(6) <= 7
+    //       and rising uses min-7 divisor, so always include (797/7 > 747/7)
+    // All 6 matches included. Since 6 < 7 (rising), divide by 7: 797/7 = 113.9
     const matches = [
       makeMatch("loss", 0),
       makeMatch("loss", 0),
@@ -38,16 +39,16 @@ describe("calculateOptimizedAverage", () => {
       makeMatch("win", 50),
     ];
     const avg = calculateOptimizedAverage(matches, "rising");
-    expect(avg).toBeCloseTo(747 / 7, 1); // 106.7
+    expect(avg).toBeCloseTo(797 / 7, 1); // 113.9
   });
 
-  it("applies minimum 7 divisor for rising average", () => {
+  it("includes all wins for rising when count < 7 (min-7 divisor fix)", () => {
     // Only 2 wins (313, 217), no losses
-    // Optimization: only 313 counts (adding 217 lowers avg from 313 to 265)
-    // 1 match < 7 → divide by 7: 313/7 = 44.7
+    // Per-match: 313 alone gives avg 313, adding 217 lowers to 265 → old code excluded it
+    // But with min-7 divisor: 530/7 = 75.7 > 313/7 = 44.7 → include both
     const matches = [makeMatch("win", 313), makeMatch("win", 217)];
     const avg = calculateOptimizedAverage(matches, "rising");
-    expect(avg).toBeCloseTo(313 / 7, 1);
+    expect(avg).toBeCloseTo(530 / 7, 1); // 75.7
   });
 
   it("uses actual count for falling average when < 7", () => {
@@ -62,6 +63,33 @@ describe("calculateOptimizedAverage", () => {
   it("returns 0 for all losses", () => {
     const matches = [makeMatch("loss", 0), makeMatch("loss", 0), makeMatch("loss", 0)];
     expect(calculateOptimizedAverage(matches, "rising")).toBe(0);
+  });
+
+  it("falling average still excludes low wins when count < 7", () => {
+    // Falling average uses actual count as divisor, so normal optimization applies
+    // 0 losses, wins [313, 217]: 313 alone = 313/1 = 313. Adding 217 = 530/2 = 265 < 313 → exclude
+    const matches = [makeMatch("win", 313), makeMatch("win", 217)];
+    const avg = calculateOptimizedAverage(matches, "falling");
+    expect(avg).toBeCloseTo(313 / 1, 1); // 313
+  });
+
+  it("normal optimization kicks in once count reaches 7 (rising)", () => {
+    // 5 losses + wins [313, 217, 150, 50]
+    // All losses: count=5, avg=0
+    // +313: count=6, avg=52.2 → include
+    // +217: count=7, avg=75.7 → include (count hits 7)
+    // +150: count=8, avg=85.0 → 85.0 > 75.7 → include (normal optimization, count > 7)
+    // +50:  count=9, avg=81.1 → 81.1 < 85.0 → BREAK (normal optimization, count > 7)
+    // count=8 >= 7, avg = 680/8 = 85.0
+    const matches = [
+      ...Array.from({ length: 5 }, () => makeMatch("loss", 0)),
+      makeMatch("win", 313),
+      makeMatch("win", 217),
+      makeMatch("win", 150),
+      makeMatch("win", 50),
+    ];
+    const avg = calculateOptimizedAverage(matches, "rising");
+    expect(avg).toBeCloseTo(680 / 8, 1); // 85.0
   });
 
   it("includes all wins when losses create a low base", () => {
