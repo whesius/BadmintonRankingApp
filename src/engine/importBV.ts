@@ -17,12 +17,6 @@ export interface ImportedMatch {
   partnerLevel?: number;
 }
 
-const WALTER_NAMES = ["walter hesius"];
-
-function isWalter(name: string): boolean {
-  return WALTER_NAMES.includes(name.trim().toLowerCase());
-}
-
 function parseDate(dateStr: string): string | null {
   // Format: "zo 25/01/2026" or "zo 8/02/2026" (day may be 1 or 2 digits)
   const match = dateStr.match(/(\d{1,2})\/(\d{2})\/(\d{4})/);
@@ -68,10 +62,10 @@ export function parseBVHtml(html: string, playerName: string): ImportedMatch[] {
   const doc = parser.parseFromString(html, "text/html");
   const matches: ImportedMatch[] = [];
 
-  const walterNames = [playerName.trim().toLowerCase(), ...WALTER_NAMES];
+  const playerNameLower = playerName.trim().toLowerCase();
 
   function isPlayer(name: string): boolean {
-    return walterNames.includes(name.trim().toLowerCase());
+    return name.trim().toLowerCase() === playerNameLower;
   }
 
   // Find all tbody elements that contain match data
