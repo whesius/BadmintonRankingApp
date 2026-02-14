@@ -21,17 +21,38 @@ export function ImportMatches({ player, onImport }: Props) {
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [imported, setImported] = useState(false);
 
+  async function fetchViaProxy(targetUrl: string): Promise<string> {
+    const proxies = [
+      { name: "codetabs", url: (u: string) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}` },
+      { name: "allorigins", url: (u: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}` },
+    ];
+    const errors: string[] = [];
+    for (const proxy of proxies) {
+      try {
+        const res = await fetch(proxy.url(targetUrl));
+        if (!res.ok) {
+          errors.push(`${proxy.name}: HTTP ${res.status} ${res.statusText}`);
+          continue;
+        }
+        const html = await res.text();
+        if (html.length > 1000) return html;
+        errors.push(`${proxy.name}: response too small (${html.length} bytes)`);
+      } catch (e) {
+        errors.push(`${proxy.name}: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    }
+    throw new Error(errors.join("\n"));
+  }
+
   async function handleFetch() {
     setError("");
     setLoading(true);
     try {
-      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-      const res = await fetch(proxyUrl);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const html = await res.text();
+      const html = await fetchViaProxy(url);
       processHtml(html);
-    } catch {
-      setError("Could not fetch the page directly (browser security restriction). Please paste the page source instead.");
+    } catch (e) {
+      const detail = e instanceof Error ? e.message : String(e);
+      setError(`Could not fetch the page. You can paste the page source instead.\n\nDetails:\n${detail}`);
       setShowPaste(true);
     } finally {
       setLoading(false);
@@ -204,7 +225,7 @@ export function ImportMatches({ player, onImport }: Props) {
             </p>
           </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <pre className="whitespace-pre-wrap text-sm text-red-600">{error}</pre>}
 
           {showPaste && (
             <div>
