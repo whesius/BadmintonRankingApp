@@ -15,7 +15,7 @@ export function ImportMatches({ player, onImport }: Props) {
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [showPaste, setShowPaste] = useState(false);
+  const [showPaste, setShowPaste] = useState(true);
   const [pastedHtml, setPastedHtml] = useState("");
   const [parsedMatches, setParsedMatches] = useState<ImportedMatch[]>([]);
   const [selected, setSelected] = useState<Set<number>>(new Set());
@@ -73,7 +73,8 @@ export function ImportMatches({ player, onImport }: Props) {
     try {
       all = parseBVHtml(html, player.name);
     } catch {
-      setError("Could not parse the HTML. Make sure you copied the full page source.");
+      setError("Could not parse the HTML. Make sure you copied the full page source (Ctrl+U).");
+      setShowPaste(true);
       return;
     }
     const recent = filterLast52Weeks(all);
@@ -81,8 +82,9 @@ export function ImportMatches({ player, onImport }: Props) {
       setError(
         all.length > 0
           ? `Found ${all.length} total matches but none in the last 52 weeks.`
-          : "No matches found. Make sure you copied the correct page source."
+          : "No matches found. Make sure the page source contains match data.\nTry pasting the page source below (Ctrl+U on the matches page)."
       );
+      setShowPaste(true);
       return;
     }
     for (const m of recent) {
