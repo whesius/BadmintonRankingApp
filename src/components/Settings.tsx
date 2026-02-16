@@ -12,7 +12,7 @@ const DISCIPLINES: Discipline[] = ["singles", "doubles", "mixed"];
 const labels: Record<Discipline, string> = { singles: "Singles", doubles: "Doubles", mixed: "Mixed" };
 const levels = Array.from({ length: 12 }, (_, i) => i + 1);
 
-export function Setup({ player, onUpdate, onReload }: Props) {
+export function Settings({ player, onUpdate, onReload }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function handleExport() {

@@ -5,17 +5,17 @@ import { Dashboard } from "./components/Dashboard.tsx";
 import { MatchForm } from "./components/MatchForm.tsx";
 import { MatchList } from "./components/MatchList.tsx";
 import { Simulator } from "./components/Simulator.tsx";
-import { Setup } from "./components/Setup.tsx";
+import { Settings } from "./components/Settings.tsx";
 import { Help } from "./components/Help.tsx";
 import { Contact } from "./components/Contact.tsx";
 import { ImportMatches } from "./components/ImportMatches.tsx";
 import { loadPlayer } from "./storage/localStorage.ts";
 import { trackPageView, identifyUser } from "./analytics.ts";
 
-type Tab = "dashboard" | "matches" | "simulator" | "setup" | "help" | "contact";
+type Tab = "dashboard" | "matches" | "simulator" | "settings" | "help" | "contact";
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: "setup", label: "Settings" },
+  { id: "settings", label: "Settings" },
   { id: "dashboard", label: "Dashboard" },
   { id: "matches", label: "Matches" },
   { id: "simulator", label: "Simulator" },
@@ -27,7 +27,8 @@ const TAB_IDS = new Set(TABS.map((t) => t.id));
 
 function getTabFromHash(): Tab {
   const hash = window.location.hash.slice(1);
-  return TAB_IDS.has(hash as Tab) ? (hash as Tab) : "dashboard";
+  if (TAB_IDS.has(hash as Tab)) return hash as Tab;
+  return loadPlayer().name ? "dashboard" : "settings";
 }
 
 export default function App() {
@@ -95,7 +96,7 @@ export default function App() {
           </div>
         )}
         {tab === "simulator" && <Simulator player={player} matches={matches} />}
-        {tab === "setup" && <Setup player={player} onUpdate={updatePlayer} onReload={handleReload} />}
+        {tab === "settings" && <Settings player={player} onUpdate={updatePlayer} onReload={handleReload} />}
         {tab === "help" && <Help />}
         {tab === "contact" && <Contact />}
       </main>

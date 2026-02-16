@@ -19,7 +19,7 @@ export function Dashboard({ player, matches }: Props) {
   if (!player.name) {
     return (
       <div className="py-12 text-center text-gray-400">
-        <p className="text-lg">Welcome! Set up your profile in the Setup tab to get started.</p>
+        <p className="text-lg">Welcome! Set up your profile in the Settings tab to get started.</p>
       </div>
     );
   }

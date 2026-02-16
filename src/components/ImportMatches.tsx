@@ -193,11 +193,11 @@ export function ImportMatches({ player, onImport }: Props) {
       {player.name ? (
         <p className="mb-3 text-xs text-gray-500">
           Matching player: <span className="font-semibold">{player.name}</span> — must match your name on the BV page exactly.
-          Change it in <span className="font-semibold">Setup</span> if needed.
+          Change it in <span className="font-semibold">Settings</span> if needed.
         </p>
       ) : (
         <p className="mb-3 text-xs text-amber-600 font-medium">
-          No player name set. Go to <span className="font-semibold">Setup</span> first and enter your name exactly as it appears on the BV page.
+          No player name set. Go to <span className="font-semibold">Settings</span> first and enter your name exactly as it appears on the BV page.
         </p>
       )}
 

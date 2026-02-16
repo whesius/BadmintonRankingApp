@@ -5,7 +5,7 @@ export function Help() {
       <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
         <h2 className="mb-3 text-xl font-bold text-gray-900">Getting Started</h2>
         <ol className="list-inside list-decimal space-y-2 text-sm text-gray-700">
-          <li>Go to the <strong>Setup</strong> tab and enter your name, member ID, gender, and current classification levels for each discipline (singles, doubles, mixed).</li>
+          <li>Go to the <strong>Settings</strong> tab and enter your name, member ID, gender, and current classification levels for each discipline (singles, doubles, mixed).</li>
           <li>Switch to the <strong>Matches</strong> tab and start adding your match results.</li>
           <li>The <strong>Dashboard</strong> will automatically calculate your rising and falling averages and show how close you are to promotion or demotion.</li>
           <li>Use the <strong>Simulator</strong> to explore "what if" scenarios before your next tournament or interclub.</li>
@@ -118,9 +118,9 @@ export function Help() {
         </ul>
       </section>
 
-      {/* Setup & Data */}
+      {/* Settings & Data */}
       <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-        <h2 className="mb-3 text-xl font-bold text-gray-900">Setup Tab &amp; Data</h2>
+        <h2 className="mb-3 text-xl font-bold text-gray-900">Settings Tab &amp; Data</h2>
         <ul className="list-inside list-disc space-y-1 text-sm text-gray-700">
           <li>All data is stored <strong>locally in your browser</strong> (localStorage). Nothing is sent to a server.</li>
           <li>Use <strong>Export JSON</strong> to save a backup of all your data. Use <strong>Import JSON</strong> to restore it on another device or browser.</li>
