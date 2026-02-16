@@ -15,10 +15,10 @@ import { trackPageView, identifyUser } from "./analytics.ts";
 type Tab = "dashboard" | "matches" | "simulator" | "setup" | "help" | "contact";
 
 const TABS: { id: Tab; label: string }[] = [
+  { id: "setup", label: "Settings" },
   { id: "dashboard", label: "Dashboard" },
   { id: "matches", label: "Matches" },
   { id: "simulator", label: "Simulator" },
-  { id: "setup", label: "Setup" },
   { id: "help", label: "Help" },
   { id: "contact", label: "Contact" },
 ];
