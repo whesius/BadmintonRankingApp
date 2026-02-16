@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { usePlayer } from "./hooks/usePlayer.ts";
 import { useMatches } from "./hooks/useMatches.ts";
 import { Dashboard } from "./components/Dashboard.tsx";
@@ -10,6 +10,7 @@ import { Help } from "./components/Help.tsx";
 import { Contact } from "./components/Contact.tsx";
 import { ImportMatches } from "./components/ImportMatches.tsx";
 import { loadPlayer } from "./storage/localStorage.ts";
+import { trackPageView, identifyUser } from "./analytics.ts";
 
 type Tab = "dashboard" | "matches" | "simulator" | "setup" | "help" | "contact";
 
@@ -35,9 +36,21 @@ export default function App() {
   const setTab = useCallback((t: Tab) => {
     setTabState(t);
     window.location.hash = t;
+    const label = TABS.find((tab) => tab.id === t)?.label ?? t;
+    trackPageView(t, label);
   }, []);
   const { player, setPlayer, updatePlayer } = usePlayer();
   const { matches, addMatch, addMatches, deleteMatch } = useMatches();
+
+  useEffect(() => {
+    const label = TABS.find((t) => t.id === tab)?.label ?? tab;
+    trackPageView(tab, label);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (player.name) identifyUser(player.name);
+  }, [player.name]);
 
   const handleReload = useCallback(() => {
     setPlayer(loadPlayer());
