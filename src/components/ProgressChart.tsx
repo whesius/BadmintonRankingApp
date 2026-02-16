@@ -26,7 +26,7 @@ export function ProgressChart({ matches, discipline, playerLevel }: Props) {
     const risingAvg = calculateOptimizedAverage(risingMatches, "rising");
 
     return {
-      date: lastMatch.date,
+      date: new Date(lastMatch.date).toLocaleDateString(),
       risingAvg: Math.round(risingAvg * 10) / 10,
       match: i + 1,
     };

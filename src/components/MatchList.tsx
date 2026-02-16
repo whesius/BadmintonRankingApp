@@ -34,7 +34,7 @@ export function MatchList({ matches, onDelete }: Props) {
         <tbody>
           {sorted.map((m) => (
             <tr key={m.id} className={`border-b border-gray-100 ${m.walkover ? "opacity-50" : ""}`}>
-              <td className="px-4 py-2 font-mono text-xs">{m.date}</td>
+              <td className="px-4 py-2 font-mono text-xs">{new Date(m.date).toLocaleDateString()}</td>
               <td className="px-4 py-2 capitalize">{m.discipline}</td>
               <td className="px-4 py-2">{opponentLabel(m)}</td>
               <td className="px-4 py-2">

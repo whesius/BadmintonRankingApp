@@ -329,7 +329,7 @@ export function ImportMatches({ player, onImport }: Props) {
                               onChange={() => toggleSelect(i)}
                             />
                           </td>
-                          <td className="py-2 pr-2 whitespace-nowrap align-top">{m.date}</td>
+                          <td className="py-2 pr-2 whitespace-nowrap align-top">{new Date(m.date).toLocaleDateString()}</td>
                           {/* Left side — our player (+ partner) */}
                           <td className={`py-2 pr-2 text-right align-top ${leftBold}`}>
                             <div className="flex flex-col items-end gap-0.5">

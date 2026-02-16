@@ -142,6 +142,22 @@ export function Help() {
         </ul>
       </section>
 
+      {/* Date Format */}
+      <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+        <h2 className="mb-3 text-xl font-bold text-gray-900">Date Format</h2>
+        <p className="text-sm text-gray-700">
+          Dates are displayed according to your browser's language setting. For example, if your browser is set to Dutch (Belgium), dates appear as <strong>16/02/2026</strong>. If set to US English, they appear as <strong>2/16/2026</strong>.
+        </p>
+        <p className="mt-2 text-sm text-gray-700">
+          To change the date format, change your browser's preferred language:
+        </p>
+        <ul className="mt-2 list-inside list-disc space-y-1 text-sm text-gray-700">
+          <li><strong>Chrome:</strong> Settings &rarr; Languages &rarr; move your preferred language to the top of the list.</li>
+          <li><strong>Firefox:</strong> Settings &rarr; General &rarr; Language &rarr; choose your preferred language.</li>
+          <li><strong>Edge:</strong> Settings &rarr; Languages &rarr; move your preferred language to the top of the list.</li>
+        </ul>
+      </section>
+
       {/* About */}
       <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
         <h2 className="mb-3 text-xl font-bold text-gray-900">About</h2>
